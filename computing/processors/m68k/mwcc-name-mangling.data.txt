@@ -1,0 +1,239 @@
+# Names of various functions after being name-mangled through mwcc.
+#
+# Turns out this doesn't match up with anything that c++filt knows about. :/
+# This file could serve as test data for a demangler.
+#
+# for each grouping:
+# first line is the demangled name
+# second line is what it becomes
+
+operator_testing(operator_mangler &, operator_mangler &)
+_operator_testing__FR16operator_manglerR16operator_mangler
+
+virtual_child::virtual_child()
+___ct__13virtual_childFv
+
+virtual_base::~virtual_base()
+___dt__12virtual_baseFv
+
+virtual_child::~virtual_child()
+___dt__13virtual_childFv
+
+virtual_child::pure_virtual_method(int)
+_pure_virtual_method__13virtual_childFi 
+
+operator_mangler::operator_mangler(int)
+___ct__16operator_manglerFi
+
+operator_mangler::operator+()
+___pl__16operator_manglerFv
+
+operator_mangler::operator-()
+___mi__16operator_manglerFv
+
+operator_mangler::operator&()
+___ad__16operator_manglerFv
+
+operator_mangler::operator*()
+___ml__16operator_manglerFv
+
+operator_mangler::operator~()
+___co__16operator_manglerFv
+
+operator_mangler::operator+(const operator_mangler &)
+___pl__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator-(const operator_mangler &)
+___mi__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator*(const operator_mangler &)
+___ml__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator/(const operator_mangler &)
+___dv__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator%(const operator_mangler &)
+___md__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator&(const operator_mangler &)
+___ad__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator|(const operator_mangler &)
+___or__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator^(const operator_mangler &)
+___er__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator=(const operator_mangler &)
+___as__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator+=(const operator_mangler &)
+___apl__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator-=(const operator_mangler &)
+___ami__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator*=(const operator_mangler &)
+___amu__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator/=(const operator_mangler &)
+___adv__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator%=(const operator_mangler &)
+___amd__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator&=(const operator_mangler &)
+___aad__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator|=(const operator_mangler &)
+___aor__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator^=(const operator_mangler &)
+___aer__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator<<(const operator_mangler &)
+___ls__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator>>(const operator_mangler &)
+___rs__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator<<=(const operator_mangler &)
+___als__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator>>=(const operator_mangler &)
+___ars__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator==(const operator_mangler &)
+___eq__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator!=(const operator_mangler &)
+___ne__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator<(const operator_mangler &)
+___lt__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator>(const operator_mangler &)
+___gt__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator<=(const operator_mangler &)
+___le__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator>=(const operator_mangler &)
+___ge__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator&&(const operator_mangler &)
+___aa__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator||(const operator_mangler &)
+___oo__16operator_manglerFRC16operator_mangler
+
+operator_mangler::operator++(int)
+___pp__16operator_manglerFi
+
+operator_mangler::operator--(int)
+___mm__16operator_manglerFi
+
+operator_mangler::operator++()
+___pp__16operator_manglerFv
+
+operator_mangler::operator--()
+___mm__16operator_manglerFv
+
+operator_mangler::operator bool()
+___opb__16operator_manglerFv
+
+operator_mangler::operator->()
+___rf__16operator_manglerFv
+
+operator_mangler::operator->*(operator_mangler)
+___rm__16operator_manglerF16operator_mangler
+
+operator_mangler::operator,(operator_mangler &)
+___cm__16operator_manglerFR16operator_mangler
+
+operator new(unsigned long, new_tag)
+___nw__FUl7new_tag
+
+operator new[](unsigned long, new_tag)
+___nwa__FUl7new_tag
+
+operator delete(void *) throw()
+___dl__FPv
+
+operator delete[](void *) throw()
+___dla__FPv
+
+vtable for virtual_child
+___vt__13virtual_child
+
+typeinfo for virtual_child
+___RTTI__13virtual_child
+
+vtable for virtual base
+___vt__12virtual_base
+
+typeinfo for virtual_base
+___RTTI__12virtual_base
+
+std::basic_string<char, std::char_traits<char>, std::allocator<char>>::zero()
+_zero__Q23std59basic_string<c,Q23std14char_traits<c>,Q23std12allocator<c>>Fv
+
+std::basic_string<char, std::char_traits<char>, std::allocator<char>>::~basic_string()
+___dt__Q23std59basic_string<c,Q23std14char_traits<c>,Q23std12allocator<c>>Fv
+
+mangle(char)
+_mangle__Fc
+
+mangle(signed char)
+_mangle__FSc
+
+mangle(unsigned short)
+_mangle__FUs
+
+mangle(short)
+_mangle__Fs
+
+mangle(unsigned long)
+_mangle__FUl
+
+mangle(long)
+_mangle__Fl
+
+mangle(unsigned int)
+_mangle__FUi
+
+mangle(int)
+_mangle__Fi
+
+mangle(unsigned long long)
+_mangle__FUx
+
+mangle(long long)
+_mangle__Fx
+
+mangle(float)
+_mangle__Ff
+
+mangle(double)
+_mangle__Fd
+
+mangle(long double)
+_mangle__Fr
+
+mangle(wchar_t)
+_mangle__Fw
+
+mangle(int *)
+_mangle__FPi
+
+mangle(const int *)
+_mangle__FPCi
+
+mangle(volatile int *)
+_mangle__FPVi
+
+mangle(const volatile int *)
+_mangle__FPCVi
+
+ExampleFunction(int *, int, int, int *, bool, bool, bool *)
+_ExampleFunction__FPiiiPibbPb
