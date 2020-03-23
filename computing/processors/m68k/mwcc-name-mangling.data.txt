@@ -235,5 +235,44 @@ _mangle__FPVi
 mangle(const volatile int *)
 _mangle__FPCVi
 
+mangle(std::complex<double>)
+_mangle__FQ23std10complex<d>
+
 ExampleFunction(int *, int, int, int *, bool, bool, bool *)
 _ExampleFunction__FPiiiPibbPb
+
+foo(int, foo &, int, foo &, int, foo &)
+_foo__FiR3fooiR3fooiR3foo
+
+static_member::member_var
+_member_var__13static_member
+
+static_member::static_func(int, int, int)
+_static_func__13static_memberFiii
+
+namespaced_member::member_var
+_member_var__17namespaced_member
+
+ns1::ns2::ns3::namespaced_func(int)
+_namespaced_func__Q33ns13ns23ns3Fi
+
+complexfunc2(int (*)(char *))
+_complexfunc2__FPFPc_i
+
+complexfunc3(int (*)(short (*)(long *)))
+_complexfunc3__FPFPFPl_s_i
+
+complexfunc4(int (*)(short (*)(char *)))
+_complexfunc4__FPFPFPc_s_i
+
+complexfunc5(int (*)(long) (*)(char *))
+_complexfunc5__FPFPc_PFl_i
+
+complexfunc6(int (*)(long) (*)(int *))
+_complexfunc6__FPFPi_PFl_i
+
+complexfunc7(int (*)(long) (*)(int (*)(char *)))
+_complexfunc7__FPFPFPc_i_PFl_i
+
+foo(int, foo &, int, foo &, int, foo &)
+_foo__FiR3fooiR3fooiR3foo
