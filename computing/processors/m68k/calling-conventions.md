@@ -2,6 +2,11 @@
 
 There is no single universal standard calling convention for the Motorola 68000.
 
+I put this document together while investigating better support for 68000 disassembly in
+[Ghidra](https://ghidra-sre.org/), which as of 9.1.2 only knows about the System V calling
+convention. However, the ubiquity of the 68000 and its derivatives lent itself to a wide
+variety of compilers across a variety of operating systems.
+
 ## Native types
 
 The Motorola 68000 family has the following native types:
@@ -15,7 +20,7 @@ The 68881/68882 FPUs and the 68040's built-in FPU also have the following types:
 - `extended`: 96-bit extended precision; 15-bit exponent, 16 unused bits, 64-bit mantissa
 - `packed`: a packed decimal real format consisting of a 3-digit base-10 exponent and a 17-digit base 10 mantissa.
 
-The ColdFire v4e FPU does not support the `extended` or `packed` formats
+The ColdFire v4e FPU does not support the `extended` or `packed` formats.
 
 ## System V
 
@@ -115,8 +120,9 @@ There are three different calling conventions:
 Register usage is the same for all three ABIs:
 - `D0`..`D2`, `A0`, and `A1` are scratch registers.
 - `D3`..`D7` and `A2`..`A5` are locals, and must be saved by the callee if used.
-- `A6` is the frame pointer, if implemented. (May be aliased to `FP`)
 - `A7` is the stack pointer. (Commonly aliased to `SP`)
+- `A6` is the frame pointer, if implemented. (May be aliased to `FP`)
+- `A5` is reserved for the base address of small static data (`.sbss` and `.sdata`)
 - If a FPU exists, then `FP0`..`FP2` are scratch registers, and `FP3`..`FP7` are locals.
 
 Return values are the same for all three ABIs, and are identical to the System V convention.
@@ -149,4 +155,91 @@ Initial arguments are in registers:
 - The first two pointer arguments are in `A0` and `A1`.
 - The first three integral arguments are in `D0`, `D1`, and `D2`.
 - All other arguments (including structures and unions) are on the stack the same way as `standard_abi`.
+
+## Amiga
+
+[In general](http://amigadev.elowar.com/read/ADCD_2.1/Libraries_Manual_guide/node000F.html):
+- `D0`, `D1`, `A0`, `A1` are scratch registers.
+- `A7` is the stack pointer.
+- `A6` is the library base address.
+- `A5` is the frame pointer, if implemented.
+- `A4` is the small data pointer, if implemented.
+
+Because of `A6` being the library base address and not the frame pointer,
+[upstream versions of gcc are generally unsuitable for Amiga development](https://retrocomputing.stackexchange.com/questions/605/are-there-any-modern-compilers-that-can-generate-amiga-m68k-executables),
+although there are some one-off out-of-tree versions that claim support.
+
+Interrupt handlers, set by `SetIntVector` have [a different convention](http://amigadev.elowar.com/read/ADCD_2.1/Libraries_Manual_guide/node030A.html):
+- `D1` contains a bitmask of enabled-and-active interrupts
+- `A0` points to the base address of the Amiga custom chips
+- `A1` points to the data area of the Interrupt structure
+- `A5` is used as a vector to your interrupt code
+- `A6` is the library base address of the Exec library
+
+### vbcc
+
+vbcc is not solely an Amiga compiler, but it seems to be popular for that use.
+
+According to [vbcc's documentation on the m68k backend](https://server.owl.de/~frank/vbcc/docs/vbcc.pdf#40):
+
+- `D0`, `D1`, `A0`, `A1`, `FP0` and `FP1` are scratch registers
+    - The `-a2scratch`, `-d2scratch`, and `-fp2scratch` options allow uses of those registers as scratch registers
+- `A7` is the stack pointer.
+- `A5` is the frame pointer, if desired (`-use-framepointer`)
+- `A4` is the small data pointer, if desired (`-sd`)
+- All other registers are used for locals and must be saved by the callee.
+- All arguments are passed on the stack.
+    - Except when `-fastcall` is set? This option isn't well-documented otherwise.
+- Return values:
+    - All scalar types up to 4 bytes are returned in `D0` (`long long` is returned in `D0`/`D1`)
+    - Floating point values are returned in `FP0` (unless `-no-fpreturn` is specified)
+    - Types that are 8, 12, or 16 bytes large are returned in `D0`/`D1`/`A0`/`A1` (unless `-no-mreg-return` is specified)
+    - All other types are returned by passing the function the address of the result as a hidden argument.
+
+### Apollo Core 68080
+
+The [68080 Core](https://wiki.apollo-accelerators.com/doku.php/apollo_core:start) from [Apollo Accelerators](https://wiki.apollo-accelerators.com/doku.php/start)
+supports "AMMX", a set of 64-bit vector instructions. AMMX adds 48 new registers to the normal `D0`..`D7` and `A0`..`A7`:
+- `B0`..`B7`: additional address registers
+- `E0`..`E23`: additional data registers
+
+As far as I can tell, all of these registers if used would be required to be callee-saved.
+I'm not aware of a compiler that can yet generate code utilizing these, as the AMMX instructions
+and extra registers only exist in the Vampire implementation, as [the author of WinUAE has rejected adding support](http://eab.abime.net/showthread.php?t=84264)
+which means there's no emulator-based implementation to target.
+
+## Macintosh
+
+The [Mac OS Runtime Architectures document](https://developer.apple.com/library/archive/documentation/mac/pdf/MacOS_RT_Architectures.pdf) lists:
+- `D0`..`D2`, `A0`..`A1`, and `FP0`..`FP3` are scratch registers
+- `D3`..`D7`, `A2`..`A4`, and `FP4`..`FP7` are callee-preserved
+- `A5` is used to to access global adata objects and the jump table
+- `A6` is the frame pointer
+- `A7` is the stack pointer
+
+## Pascal Calling Convention
+
+- The caller passes space for the return value before pushing parameters.
+- The caller than passes parameters onto the stack from left-to-right, with 2-byte alignment.
+- Return values are on the stack:
+    - If the value is 4 bytes or smaller, the item on the stack is the return value.
+    - If the return value is larger than 4 bytes, the item on the stack is a pointer to the return value.
+- The callee is responsible for popping parameters off the stack, and the caller is responsible for popping the result.
+
+## SC compiler (from Macintosh Programmer's Workshop)
+
+- Parameters are passed onto the stack right-to-left, with 2-byte alignment.
+- The caller is responsible for cleaning up the stack.
+- Function values are normally returned in `D0` or `FP0`
+    - Unless the data structure is larger than 4 bytes, in which case a pointer is passed as a hidden first parameter
+
+## CFM-68K
+
+The Code Fragment Manager architecture is based on the SC calling convention.
+
+- Parameters are passed onto the stack right-to-left, with 4-byte alignment.
+- A6 stack frames contain two reserved longwords at `-4(A6)` and `-8(A6)`.
+- Return values:
+    - Integers, `float`s, and any other type 4 bytes or smaller is returned in `D0`
+    - for `double`, `extended`, and any other type larger than 4 bytes, a pointer is pushed onto the call stack after all user-visible arguments, and the return value goes there; the pointer is returned in `D0`
 
