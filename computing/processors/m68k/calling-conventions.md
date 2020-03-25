@@ -7,6 +7,28 @@ I put this document together while investigating better support for 68000 disass
 convention. However, the ubiquity of the 68000 and its derivatives lent itself to a wide
 variety of compilers across a variety of operating systems.
 
+## Comparison chart
+
+| Platform            | System V     | mwcc regabi  | mwcc stdabi  | mwcc compact_abi | Amiga      | Mac Pascal   | Mac C      |
+|---------------------|--------------|--------------|--------------|------------------|------------|--------------|------------|
+| data scratch regs   | `D0`..`D1`   | `D0`..`D2`   | `D0`..`D2`   | `D0`..`D2`       | `D0`..`D1` | `D0`..`D2`   | same       |
+| addr scratch regs   | `A0`..`A1`   | `A0`..`A1`   | `A0`..`A1`   | `A0`..`A1`       | `A0`..`A1` | `A0`..`A1`   | same       |
+| FPU  scratch regs   | `FP0`..`FP1` | `FP0`..`FP2` | `FP0`..`FP2` | `FP0`..`FP2`     | ???        | `FP0`..`FP3` | same       |
+| global data ptr     | ???          | ???          | ???          | ???              | ???        | `A5`         | same       |
+| small data ptr      | ???          | `A5`         | `A5`         | `A5`             | `A4`       | ???          | same       |
+| frame pointer       | `A6`         | `A6`         | `A6`         | `A6`             | `A5`       | `A6`         | same       |
+| integer return vals | `D0`         | `D0`         | `D0`         | `D0`             | `D0`       | stack        | `D0`       |
+| pointer return vals | `A0`         | `A0`         | `A0`         | `A0`             | `D0`       | stack        | `D0`       |
+| FPU return vals     | `FP0`        | `FP0`        | `FP0`        | `FP0`            | `FP0`?     | stack        | `FP0`      |
+| 64-bit int returns  | `D0`+`D1`?   | as struct    | as struct    | as struct        | `D0`+`D1`? | stack?       | ptr in `D0`|
+| struct return vals  | addr in `A0` | addr in `A0` | addr in `A0` | addr in `A0`     | ???        | ptr on stack | ptr in `D0`|
+| param order         | r-to-l       | both[1]      | r-to-l       | r-to-l           | r-to-l?    | l-to-r       | r-to-l     |
+| params passed in    | stack        | regs[2]      | stack        | stack            | stack?     | stack        | stack      |
+| stack alignment     | 4-byte       | 4-byte       | 4-byte       | 2-byte           | ???        | 2-byte       | 2-byte     |
+
+[1] register-based args are left-to-right, stack-based args are right-to-left
+[2] first three integers in `D0`..`D2`, first two pointers in `A0`..`A1`, first two floats in `FP0`..`FP1`, stack thereafter
+
 ## Native types
 
 The Motorola 68000 family has the following native types:
@@ -87,6 +109,8 @@ Return values depend on the type:
 - 64-bit types (`long long int`) became commonplace after the 1990 publication of the _System V 68000 Supplement_. gcc returns 64-bit quantities in `D0` (MSBs) and `D1` (LSBs). I can't find documentation for this.
 - gcc does not support `__int128` on this target.
 - ColdFire targets that have a FPU (e.g., `-mcpu=548x`) do not support extended-precision floating point; `long double` is a synonym for `double` on these targets. [This was a change in GCC 4.3](https://www.gnu.org/software/gcc/gcc-4.3/changes.html).
+
+# Embedded/Bare Metal
 
 ## Metrowerks CodeWarrior
 
@@ -217,7 +241,7 @@ The [Mac OS Runtime Architectures document](https://developer.apple.com/library/
 - `A6` is the frame pointer
 - `A7` is the stack pointer
 
-## Pascal Calling Convention
+### Pascal Calling Convention
 
 - The caller passes space for the return value before pushing parameters.
 - The caller than passes parameters onto the stack from left-to-right, with 2-byte alignment.
@@ -226,14 +250,14 @@ The [Mac OS Runtime Architectures document](https://developer.apple.com/library/
     - If the return value is larger than 4 bytes, the item on the stack is a pointer to the return value.
 - The callee is responsible for popping parameters off the stack, and the caller is responsible for popping the result.
 
-## SC compiler (from Macintosh Programmer's Workshop)
+### SC compiler (from Macintosh Programmer's Workshop)
 
 - Parameters are passed onto the stack right-to-left, with 2-byte alignment.
 - The caller is responsible for cleaning up the stack.
 - Function values are normally returned in `D0` or `FP0`
     - Unless the data structure is larger than 4 bytes, in which case a pointer is passed as a hidden first parameter
 
-## CFM-68K
+### CFM-68K
 
 The Code Fragment Manager architecture is based on the SC calling convention.
 
@@ -243,3 +267,23 @@ The Code Fragment Manager architecture is based on the SC calling convention.
     - Integers, `float`s, and any other type 4 bytes or smaller is returned in `D0`
     - for `double`, `extended`, and any other type larger than 4 bytes, a pointer is pushed onto the call stack after all user-visible arguments, and the return value goes there; the pointer is returned in `D0`
 
+## Palm OS
+
+Older Palm OS handsets (4.x and earlier) used the Motorola Dragonball (CPU32) processor.
+
+The [Free Pascal Wiki](https://wiki.lazarus.freepascal.org/PalmOS_port) describes the calling convention as:
+
+> As a difference to the [standard m68k register layout](https://wiki.freepascal.org/m68k), on PalmOS also d2
+> and a2 registers are used as scratch registers, and their contents are not preserved. This is dictated by
+> the ABI used by the C compilers and the syscall convention of the platform. Additionally, register a5 is
+> used as a pointer to the global data. On PalmOS, register a5 points to the end of the global data. 
+
+From this we get:
+
+- `D0`..`D2` and `A0`..`A2` are scratch registers
+- `D3`..`D7` and `A3`..`A4` are callee-preserved
+- `A5` is used to to access global data
+- `A6` is (probably?) the frame pointer
+- `A7` is the stack pointer
+
+I can't find any otherwise-authoritative documentation for this one. :/
